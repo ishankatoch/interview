@@ -19,6 +19,13 @@ During compilation, the entire source code is converted into machine code. Machi
 
 In interpretation, the code is executed line by line. Each line of source code in Python is translated into machine code during the execution. There is a Virtual Machine available to interpret the python code. The compilation and interpretation runtime structure is given in the above diagram.
 
+**Simple Explanation**
+
+- In various books of python programming, it is mentioned that python language is interpreted. But that is half correct the python program is first compiled and then interpreted. The compilation part is hidden from the programmer thus, many programmers believe that it is an interpreted language. 
+- The compilation part is done first when we execute our code and this will generate byte code and internally this byte code gets converted by the python virtual machine(p.v.m) according to the underlying platform(machine+operating system).
+- Now the question is – if there is any proof that python first compiles the program internally and then run the code via interpreter?
+The answer is yes! and note this compiled part is get deleted by the python(as soon as you execute your code) just it does not want programmers to get into complexity
+
 
 > What is meant by dynamicaly typed language?
 
@@ -56,6 +63,12 @@ pip freeze > requirements.txt
 pip install requirements.txt
 deactivate
 ```
+
+> How is memory managed in Python?
+
+- Memory management in python is managed by Python private heap space. All Python objects and data structures are located in a private heap. The programmer does not have access to this private heap. The python interpreter takes care of this instead.
+- The allocation of heap space for Python objects is done by Python’s memory manager. The core API gives access to some tools for the programmer to code.
+- Python also has an inbuilt garbage collector, which recycles all the unused memory and so that it can be made available to the heap space.
 
 > Explain different data types in python?
 
@@ -186,6 +199,27 @@ for i in range(5):
 3 is odd
 4 is even
 
+```
+
+> Shallow copy and deep copy
+
+- A shallow copy constructs a new compound object and then (to the extent possible) inserts references into it to the objects found in the original.
+- A deep copy constructs a new compound object and then, recursively, inserts copies into it of the objects found in the original
+- making a shallow copy of a nested object with copy (or using slicing: [:]) inner objects are references, so updating one updates all copies. Not so with deepcopy.
+
+```python
+items = { 'id': 1, 'name':'laptop'}
+items_copy = items
+items_copy['name'] = 'Desktop'
+items
+#output oops it should have stayed intact
+{'id': 1, 'name': 'Desktop'}
+#using deepcopy
+items = { 'id': 1, 'name':'laptop'}
+items_copy = deepcopy(items)
+items_copy['name'] = 'Desktop'
+items
+{'id': 1, 'name': 'laptop'}
 ```
 
 > Collections.Counter
@@ -385,9 +419,35 @@ def my_decorator(func):
 
 > Logging module, configuration etc
 
+The logging module is quite easy to setup and use. Here we log various messages to an example.log. Notice how logging.exception logs the Traceback alongside the message we gave it (note it should only be called from an exception handler)
+
+```python
+>>> import logging 
+>>> FORMAT = '%(asctime)s %(levelname)s %(module)s %(funcName)s %(message)s' 
+>>> logging.basicConfig(filename='example.log', encoding='utf-8', level=logging.INFO, format=FORMAT)
+>>> logging.debug('not logged') 
+>>> logging.info('info is logged')
+```
+
 > Types of argument positional, keyword, *args, **kwargs
 
-> Exception handling in python. try, catch, finally
+Create a function which can add any number of arguments
+```python
+def add_unknown(*args):
+...     sum=0
+...     for arg in args:
+...         sum+=arg
+...     return sum    
+... 
+add_unknown(1,4,2,5,8)
+20
+```
+
+> How is Exceptional handling done in Python
+
+There are 3 main keywords i.e. try, except, and finally which are used to catch exceptions and handle the recovering mechanism accordingly. Try is the block of a code which is monitored for errors. Except block gets executed when an error occurs.
+
+The beauty of the final block is to execute the code after trying for error. This block gets executed irrespective of whether an error occurred or not. Finally block is used to do the required cleanup activities of objects/variables.
 
 > List comprehensions
 
@@ -451,6 +511,19 @@ what are re, metacharacters
 - types
 - instance method, class method, static method
 
+Inheritance allows One class to gain all the members(say attributes and methods) of another class. Inheritance provides code reusability, makes it easier to create and maintain an application. The class from which we are inheriting is called super-class and the class that is inherited is called a derived / child class.
+
+They are different types of inheritance supported by Python:
+
+Single Inheritance – where a derived class acquires the members of a single super class.
+Multi-level inheritance – a derived class d1 in inherited from base class base1, and d2 are inherited from base2.
+Hierarchical inheritance – from one base class you can inherit any number of child classes
+Multiple inheritance – a derived class is inherited from more than one base class.
+
+> What is polymorphism in Python?
+
+Polymorphism means the ability to take multiple forms. So, for instance, if the parent class has a method named ABC then the child class also can have a method with the same name ABC having its own parameters and variables. Python allows for polymorphism.
+
 > WAP to find largest word in a text file
 - words = read.split()
 - max (word, key=len(word))
@@ -458,3 +531,55 @@ what are re, metacharacters
 > WAP to count frequency of words ina file
 
 - Counter(f.read().split())
+
+> What is the difference between `__str__` and `__repr__` in Python?
+
+`__repr__` is to be unambiguous and `__str__` is to be readable.
+Or as Ned Batchelder succinctly said: "`__repr__` is for developers, `__str__` is for customers." As we can see above, the datetime module follows this advice nicely.
+
+```python
+>>> from datetime import date 
+>>> today = date.today() 
+>>> str(today) 
+'2020-10-31' 
+>>> repr(today) 
+'datetime.date(2020, 10, 31)'
+```
+> How do you achieve multithreading in Python?
+
+Python has a multi-threading package but if you want to multi-thread to speed your code up, then it’s usually not a good idea to use it.
+Python has a construct called the Global Interpreter Lock (GIL). The GIL makes sure that only one of your ‘threads’ can execute at any one time. A thread acquires the GIL, does a little work, then passes the GIL onto the next thread.
+This happens very quickly so to the human eye it may seem like your threads are executing in parallel, but they are really just taking turns using the same CPU core.
+All this GIL passing adds overhead to execution. This means that if you want to make your code run faster then using the threading package often isn’t a good idea
+
+> Convert a dict to json
+
+json.dumps to convert a dict into JSON
+This is handy when you need to pass in JSON when calling an API endpoint like we'll see in the next tip. Note that when a dictionary is converted into JSON, all the keys of the dictionary are coerced to strings. So converting it back to a dict you might not end up with the same initial data.
+```python
+payload = {
+... "description": "the description for this gist",
+... "public": True,
+... "files": {
+... "file1.txt": {
+... "content": "String file contents"
+... }
+... }
+... }
+>>> type(payload)
+<class 'dict'>
+>>> import json
+>>> payload_json = json.dumps(payload, indent=4)
+>>> type(payload_json)
+<class 'str'>
+>>> print(payload_json)
+{
+"description": "the description for this gist",
+"public": true,
+"files": {
+"file1.txt": {
+"content": "String file contents"
+}
+}
+}
+```
